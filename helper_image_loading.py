@@ -1,7 +1,7 @@
 import numpy as np
 
 # Imports for visualization
-import PIL.Image
+import cv2
 from io import StringIO
 import urllib.request
 
@@ -9,10 +9,10 @@ import urllib.request
 import requests
 from bs4 import BeautifulSoup
 
-# All images are returned as PIL images, not numpy arrays
+# All images are returned as OpenCV images, not numpy arrays
 def loadImageGrayscale(img_file):
   """Load image from file, convert to grayscale float32 numpy array"""
-  img = PIL.Image.open(img_file)
+  img = cv2.imread(img_file, cv2.IMREAD_GRAYSCALE)
 
   # Convert to grayscale and return
   return img.convert("L")
@@ -37,9 +37,9 @@ def loadImageFromURL(url, max_size_bytes=4000000):
       print("Skipping, url data larger than %d bytes" % max_size_bytes)
       return None, url
 
-    # Process into PIL image
-    img = PIL.Image.open(StringIO(data))
-    # Return PIL image and url used
+    # Process into OpenCV image
+    img = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    # Return OpenCV image and url used
     return img, url
   except IOError as e:
     # Return None on failure to load image from url
@@ -65,13 +65,13 @@ def tryUpdateImgurURL(url):
   return url
 
 def loadImageFromPath(img_path):
-  """Load PIL image from image filepath, keep as color"""
-  return PIL.Image.open(open(img_path,'rb'))
+  """Load OpenCV image from image filepath, keep as color"""
+  return cv2.imread(img_path, cv2.IMREAD_COLOR)
 
 
 def resizeAsNeeded(img, max_size=(2000,2000), max_fail_size=(2000,2000)):
-  if not PIL.Image.isImageType(img):
-    img = PIL.Image.fromarray(img) # Convert to PIL Image if not already
+  if type(img) == numpy.ndarray:
+    img = cv2.imdecode(img, cv2.IMREAD_COLOR)
 
   # If image is larger than fail size, don't try resizing and give up
   if img.size[0] > max_fail_size[0] or img.size[1] > max_fail_size[1]:
@@ -90,7 +90,7 @@ def resizeAsNeeded(img, max_size=(2000,2000), max_fail_size=(2000,2000)):
     print("Reducing by factor of %.2g" % (1./ratio))
     new_size = (np.array(img.size) * ratio).astype(int)
     print("New size: (%d x %d)" % (new_size[0], new_size[1]))
-    img = img.resize(new_size, PIL.Image.BILINEAR)
+    img = cv2.resize(img, new_size)
   return img
 
 def getVisualizeLink(corners, url):

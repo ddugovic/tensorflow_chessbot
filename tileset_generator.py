@@ -26,16 +26,13 @@ def saveTiles(tiles, img_save_dir, img_file):
   
   for i in range(64):
     sqr_filename = "%s/%s_%s%d.png" % (img_save_dir, img_file, letters[i%8], i/8+1)
+    img = cv2.imdecode((tiles[:,:,i]*255).astype(np.uint8))
     
     # Make resized 32x32 image from matrix and save
     if tiles.shape != (32,32,64):
-      PIL.Image.fromarray(tiles[:,:,i]) \
-          .resize([32,32], PIL.Image.ADAPTIVE) \
-          .save(sqr_filename)
-    else:
-      # Possibly saving floats 0-1 needs to change fromarray settings
-      PIL.Image.fromarray((tiles[:,:,i]*255).astype(np.uint8)) \
-          .save(sqr_filename)
+      img = cv2.resize(img, [32,32])
+
+    cv2.imwrite(sqr_filename, img)
 
 def generateTileset(input_chessboard_folder, output_tile_folder):
   # Create output folder as needed

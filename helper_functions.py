@@ -1,23 +1,21 @@
 import numpy as np
 
 # Imports for visualization
-import PIL.Image
+import cv2
 from IPython.display import clear_output, Image, display
 
 def display_array(a, fmt='jpeg', rng=[0,1]):
   """Display an array as a picture."""
   a = (a - rng[0])/float(rng[1] - rng[0]) # normalized float value
   a = np.uint8(np.clip(a*255, 0, 255))
-  f = StringIO()
 
-  PIL.Image.fromarray(np.asarray(a, dtype=np.uint8)).save(f, fmt)
-  display(Image(data=f.getvalue()))
+  img = cv2.imdecode(np.asarray(a, dtype=np.uint8), cv2.IMREAD_COLOR)
+  cv2.imshow(img)
 
 def display_weight(a, fmt='jpeg', rng=[0,1]):
   """Display an array as a color picture."""
   a = (a - rng[0])/float(rng[1] - rng[0]) # normalized float value
   a = np.uint8(np.clip(a*255, 0, 255))
-  f = StringIO()
 
   v = np.asarray(a, dtype=np.uint8)
 
@@ -41,16 +39,15 @@ def display_weight(a, fmt='jpeg', rng=[0,1]):
   intensity = np.abs(2.*a-1)
 
   rgb = np.uint8(np.dstack([r,g,b]*intensity))
+  img = cv2.imdecode(rgb, cv2.IMREAD_COLOR)
 
-  PIL.Image.fromarray(rgb).save(f, fmt)
-  display(Image(data=f.getvalue(), width=100))
+  cv2.imshow('image',img)
 
 def display_image(a, fmt='png'):
   """Display an image as a picture in-line."""
-  f = StringIO()
+  img = cv2.imdecode(np.asarray(a, dtype=np.uint8), cv2.IMREAD_COLOR)
 
-  PIL.Image.fromarray(np.asarray(a, dtype=np.uint8)).save(f, fmt)
-  display(Image(data=f.getvalue()))
+  cv2.imshow('image',img)
 
 # FEN related
 def getFENtileLabel(fen,letter,number):
@@ -132,7 +129,7 @@ def loadFENtiles(image_filepaths):
       print("."),
     
     # Image
-    images[i,:,:,0] = np.asarray(PIL.Image.open(image_filepath), dtype=np.uint8)
+    images[i,:,:,0] = np.asarray(cv2.imload(image_filepath), dtype=np.uint8)
 
     # Label
     fen = image_filepath[-78:-7]
@@ -159,6 +156,6 @@ def loadImages(image_filepaths):
   for i, image_filepath in enumerate(image_filepaths):
     if i % 100 == 0:
       print("On #%d/%d : %s" % (i,image_filepaths.size, image_filepath))
-    img = PIL.Image.open(image_filepath)
+    img = cv2.imopen(image_filepath)
     training_data[i,:,:,0] = np.asarray(img, dtype=np.uint8)
   return training_data

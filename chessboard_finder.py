@@ -12,8 +12,8 @@
 #   -h, --help  show this help message and exit
 
 
+import cv2
 import numpy as np
-import PIL.Image
 import argparse
 from time import time
 from helper_image_loading import *
@@ -166,7 +166,7 @@ def findChessboardCorners(img_arr_gray, noise_threshold = 8000):
   # Generate crop image with on full sequence, which may be wider than a normal
   # chessboard by an extra 2 tiles, we'll iterate over all combinations
   # (up to 9) and choose the one that correlates best with a chessboard
-  gray_img_crop = PIL.Image.fromarray(img_arr_gray).crop(corners)
+  gray_img_crop = cv2.imdecode(img_arr_gray).crop(corners)
 
   # Build a kernel image of an idea chessboard to correlate against
   k = 8 # Arbitrarily chose 8x8 pixel tiles for correlation image
@@ -265,9 +265,8 @@ def getChessTilesColor(img, corners):
     (padl_x + corners[0]):(padl_x + corners[2]), :]
 
   # 256x256 px RGB image, 32x32px individual RGB tiles, normalized 0-1 floats
-  chessboard_img_resized = np.asarray( \
-        PIL.Image.fromarray(chessboard_img) \
-        .resize([256,256], PIL.Image.BILINEAR), dtype=np.float32) / 255.0
+  img = cv2.resize(cv2.imdecode(chessboard_img), [256,256])
+  chessboard_img_resized = np.asarray(img, dtype=np.float32) / 255.0
 
   # stack deep 64 tiles with 3 channesl RGB each
   # so, first 3 slabs are RGB for tile A1, then next 3 slabs for tile A2 etc.
@@ -301,9 +300,8 @@ def getChessTilesGray(img, corners):
 
   # 256x256 px image, 32x32px individual tiles
   # Normalized
-  chessboard_img_resized = np.asarray( \
-        PIL.Image.fromarray(chessboard_img) \
-        .resize([256,256], PIL.Image.BILINEAR), dtype=np.uint8) / 255.0
+  img = cv2.resize(cv2.imdecode(chessboard_img), [256,256])
+  chessboard_img_resized = np.asarray(img, dtype=np.uint8) / 255.0
 
   return getTiles(chessboard_img_resized)
 
@@ -331,7 +329,7 @@ def findGrayscaleTilesInImage(img):
     return None, None
 
   # Convert to grayscale numpy array 
-  img_arr = np.asarray(img.convert("L"), dtype=np.float32)
+  img_arr = np.asarray(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
   
   # Use computer vision to find orthorectified chessboard corners in image
   corners = findChessboardCorners(img_arr)
