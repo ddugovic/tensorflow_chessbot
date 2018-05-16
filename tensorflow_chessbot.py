@@ -170,7 +170,7 @@ class ChessboardPredictor(object):
 
     # Exit on failure to find chessboard in image
     if tiles is None:
-      print('Couldn\'t find chessboard in image')
+      print("Couldn't find chessboard in image")
       return result
     
     # Make prediction on input tiles
@@ -213,7 +213,7 @@ def main(args):
 
   # Exit on failure to find chessboard in image
   if tiles is None:
-    raise Exception('Couldn\'t find chessboard in image')
+    raise Exception("Couldn't find chessboard in image")
 
   # Create Visualizer url link
   if args.url:
